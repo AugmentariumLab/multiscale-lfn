@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+message Model {
+  Network primary = 1;
+  optional Network auxiliary = 2;
+
+  message Tensor {
+    repeated int32 shape = 1;
+    repeated float values = 2;
+  }
+
+  message Network {
+    oneof network {
+      MLP mlp = 1;
+      ResNet resnet = 2;
+      SubNet subnet = 3;
+      Multimodel multimodel = 5;
+      Multisubnet multisubnet = 6;
+      Multiresnet multiresnet = 7;
+    }
+    map<string, Tensor> state_dict = 4;
+
+    message MLP {
+      int32 in_features = 1;
+      int32 out_features = 2;
+      int32 layers = 3;
+      int32 hidden_features = 4;
+      bool use_layernorm = 5;
+    }
+    message ResNet {
+      int32 in_features = 1;
+      int32 out_features = 2;
+      int32 layers = 3;
+      int32 hidden_features = 4;
+      bool use_layernorm = 5;
+      int32 output_every = 6;
+    }
+    message SubNet {
+      int32 in_features = 1;
+      int32 out_features = 2;
+      int32 layers = 3;
+      int32 hidden_features = 4;
+      bool use_layernorm = 5;
+      bool interleave = 6;
+    }
+    message Multimodel {
+      int32 num_models = 1;
+      int32 in_features = 2;
+      int32 out_features = 3;
+      int32 layers = 4;
+      int32 hidden_features = 5;
+      int32 selection_layers = 6;
+      int32 selection_hidden_features = 7;
+      string selection_mode = 8;
+    }
+    message Multisubnet {
+      int32 num_models = 1;
+      int32 in_features = 2;
+      int32 out_features = 3;
+      int32 layers = 4;
+      int32 hidden_features = 5;
+      int32 selection_layers = 6;
+      int32 selection_hidden_features = 7;
+      string selection_mode = 8;
+    }
+    message Multiresnet {
+      int32 num_models = 1;
+      int32 in_features = 2;
+      int32 out_features = 3;
+      int32 layers = 4;
+      int32 hidden_features = 5;
+      int32 selection_layers = 6;
+      int32 selection_hidden_features = 7;
+      string selection_mode = 8;
+      int32 output_every = 9;
+    }
+  }
+}

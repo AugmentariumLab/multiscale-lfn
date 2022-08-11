@@ -1,0 +1,7 @@
+configargparse
+tqdm
+sklearn
+moviepy
+open3d
+opencv-contrib-python
+matplotlib
