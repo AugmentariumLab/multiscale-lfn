@@ -29,13 +29,13 @@ background-image: linear-gradient(120deg, #156064, #086375);
 
 Neural representations have shown great promise in their ability to represent radiance and light fields while being very compact compared to the image set representation. However, current representations are not well suited for streaming as decoding can only be done at a single level of detail and requires downloading the entire neural network model. Furthermore, high-resolution light field networks can exhibit flickering and aliasing as neural networks are sampled without appropriate filtering. To resolve these issues, we present a progressive multi-scale light field network that encodes a light field with multiple levels of detail. Lower levels of detail are encoded using fewer neural network weights enabling progressive streaming and reducing rendering time. Our progressive multi-scale light field network addresses aliasing by encoding smaller anti-aliased representations at its lower levels of detail. Additionally, per-pixel level of detail enables our representation to support dithered transitions and foveated rendering.
 
-<!-- ## Downloads
+## Downloads
 
 <div style="display: flex; text-align:center; flex-direction: row; flex-wrap: wrap;">
-<div style="margin:1rem; flex-grow: 1;"><a href="#"><img style="max-width:10rem;" src="resources/text-documents.png"><br><label>Paper (coming soon)</label></a><br></div>
-<div style="margin:1rem; flex-grow: 1;"><a href="#"><img style="max-width:10rem;" src="resources/text-documents.png"><br>Supplementary (coming soon)</a></div>
-<div style="margin:1rem; flex-grow: 1;"><a href="https://github.com/AugmentariumLab/multiscale-lfn"><img style="max-width:10rem;" src="resources/brackets-coding.png"><br>Code (coming soon)</a></div>
-</div> -->
+<div style="margin:1rem; flex-grow: 1;"><a href="#" onclick="return false;"><img style="max-width:10rem;" src="resources/paper.jpg"><br>Paper (coming soon)</a><br></div>
+<div style="margin:1rem; flex-grow: 1;"><a href="#" onclick="return false;"><img style="max-width:10rem;" src="resources/supplementary.jpg"><br>Supplementary (coming soon)</a></div>
+<div style="margin:1rem; flex-grow: 1;"><a href="https://github.com/AugmentariumLab/multiscale-lfn"><img style="max-width:10rem;" src="resources/github.jpg"><br>Code</a></div>
+</div>
 
 ## Rendered Examples
 
