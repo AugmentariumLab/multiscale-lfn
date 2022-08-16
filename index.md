@@ -32,7 +32,7 @@ Neural representations have shown great promise in their ability to represent ra
 ## Downloads
 
 <div style="display: flex; text-align:center; flex-direction: row; flex-wrap: wrap;">
-<div style="margin:1rem; flex-grow: 1;"><a href="#" onclick="return false;"><img style="max-width:10rem;" src="resources/paper.jpg"><br>Paper (coming soon)</a><br></div>
+<div style="margin:1rem; flex-grow: 1;"><a href="https://arxiv.org/abs/2208.06710"><img style="max-width:10rem;" src="resources/paper.jpg"><br>Paper</a><br></div>
 <div style="margin:1rem; flex-grow: 1;"><a href="#" onclick="return false;"><img style="max-width:10rem;" src="resources/supplementary.jpg"><br>Supplementary (coming soon)</a></div>
 <div style="margin:1rem; flex-grow: 1;"><a href="https://github.com/AugmentariumLab/multiscale-lfn"><img style="max-width:10rem;" src="resources/github.jpg"><br>Code</a></div>
 </div>
