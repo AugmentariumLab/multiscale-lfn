@@ -25,7 +25,7 @@ background-image: linear-gradient(120deg, #156064, #086375);
 
 ## Abstract
 
-[![Teaser image of Progressive Multi-scale Light Field Networks](resources/teaser.png)](#)
+[![Teaser image of Progressive Multi-Scale Light Field Networks](resources/teaser.png)](#)
 
 Neural representations have shown great promise in their ability to represent radiance and light fields while being very compact compared to the image set representation. However, current representations are not well suited for streaming as decoding can only be done at a single level of detail and requires downloading the entire neural network model. Furthermore, high-resolution light field networks can exhibit flickering and aliasing as neural networks are sampled without appropriate filtering. To resolve these issues, we present a progressive multi-scale light field network that encodes a light field with multiple levels of detail. Lower levels of detail are encoded using fewer neural network weights enabling progressive streaming and reducing rendering time. Our progressive multi-scale light field network addresses aliasing by encoding smaller anti-aliased representations at its lower levels of detail. Additionally, per-pixel level of detail enables our representation to support dithered transitions and foveated rendering.
 
@@ -33,7 +33,7 @@ Neural representations have shown great promise in their ability to represent ra
 
 <div style="display: flex; text-align:center; flex-direction: row; flex-wrap: wrap;">
 <div style="margin:1rem; flex-grow: 1;"><a href="https://arxiv.org/abs/2208.06710"><img style="max-width:10rem;" src="resources/paper.jpg"><br>Paper</a><br></div>
-<div style="margin:1rem; flex-grow: 1;"><a href="#" onclick="return false;"><img style="max-width:10rem;" src="resources/supplementary.jpg"><br>Supplementary (coming soon)</a></div>
+<div style="margin:1rem; flex-grow: 1;"><a href="resources/supplementary.pdf"><img style="max-width:10rem;" src="resources/supplementary.jpg"><br>Supplementary</a></div>
 <div style="margin:1rem; flex-grow: 1;"><a href="https://github.com/AugmentariumLab/multiscale-lfn"><img style="max-width:10rem;" src="resources/github.jpg"><br>Code</a></div>
 </div>
 
@@ -219,7 +219,7 @@ Neural representations have shown great promise in their ability to represent ra
 @inproceedings{Li2022Progressive,
   author={Li, David and Varshney, Amitabh},
   booktitle={2022 International Conference on 3D Vision (3DV)},
-  title={Progressive Multi-scale Light Field Networks},
+  title={Progressive Multi-Scale Light Field Networks},
   year={2022},
   volume={},
   number={},
@@ -228,4 +228,4 @@ Neural representations have shown great promise in their ability to represent ra
 }
 ```
 
-David Li, and Amitabh Varshney. Progressive Multi-scale Light Field Networks. In 2022 International Conference on 3D Vision (3DV).
+David Li, and Amitabh Varshney. Progressive Multi-Scale Light Field Networks. In 2022 International Conference on 3D Vision (3DV).
