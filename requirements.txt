@@ -5,3 +5,4 @@ moviepy
 open3d
 opencv-contrib-python
 matplotlib
+tensorboard

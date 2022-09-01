@@ -26,17 +26,10 @@ from data_readers import holostudio_reader_utils
 from data_readers.nerf_reader import NerfSyntheticDataset
 from models import adaptive_mlp
 from models import adaptive_resnet
-from models import atlasnet
-from models import learned_ray
 from models import mlp
-from models import multimodel
 from models import subnet
 from models import video_layers
 from models import wrapper_models
-from models import multisubnet
-from models import multiresnet
-from models import subnet_svd
-from models import svdnet
 from models import mipnet
 from models import smipnet
 from protos_compiled import model_pb2
@@ -46,12 +39,10 @@ from utils import nerf_utils
 from utils import torch_checkpoint_manager
 from utils import pytorch_psnr
 from utils import pytorch_ssim
-from options import (ADAPTIVE_MLP, MLP, MULTIMODEL, ADAPTIVE_RESNET, LEARNED_RAY,
-                     ATLASNET, SUBNET, SUBNET_SVD, MULTISUBNET, MULTIRESNET,
-                     SVDNET, MIPNET, SMIPNET)
+from options import (ADAPTIVE_MLP, MLP, ADAPTIVE_RESNET, LEARNED_RAY,
+                     SUBNET, MIPNET, SMIPNET)
 
-ADAPTIVE_NETWORKS = {ADAPTIVE_RESNET, SUBNET, SUBNET_SVD,
-                     MULTISUBNET, MULTIRESNET, SVDNET, MIPNET, SMIPNET}
+ADAPTIVE_NETWORKS = {ADAPTIVE_RESNET, SUBNET, MIPNET, SMIPNET}
 
 
 class CheckpointKeys:
@@ -67,13 +58,8 @@ class CheckpointKeys:
 class InferenceOutputs:
     model_output: Union[torch.Tensor,
                         adaptive_mlp.AdaptiveMLPOutputs,
-                        multimodel.MultiModelMLPOutputs,
                         adaptive_resnet.AdaptiveResnetOutputs,
-                        atlasnet.AtlasNetOutputs,
-                        subnet.SubNetOutputs,
-                        subnet_svd.SubNetSVDOutputs,
-                        multisubnet.MultiSubnetOutputs,
-                        svdnet.SVDNetOutputs]
+                        subnet.SubNetOutputs]
     loss: torch.Tensor
     aux_output: Optional[torch.Tensor] = None
     color_loss: Optional[torch.Tensor] = None
@@ -93,9 +79,6 @@ class RenderFullImageOutputs:
     aux_image: Optional[torch.Tensor] = None
     expected_layers_image: Optional[torch.Tensor] = None
     layer_outputs: Optional[torch.Tensor] = None
-    mm_model_selection: Optional[torch.Tensor] = None
-    mm_model_top_selection_indices: Optional[Tuple[torch.Tensor,
-                                                   torch.Tensor]] = None
     uvmap_outputs: Optional[torch.Tensor] = None
 
 
@@ -244,21 +227,6 @@ class App:
                             layers=args.model_layers,
                             hidden_features=args.model_width,
                             use_layernorm=args.model_use_layernorm).to(self.device)
-        elif args.model == MULTIMODEL:
-            clustering_feature_size = base_feature_size + out_features
-            model = multimodel.MultiModelMLP(
-                num_models=args.multimodel_num_models,
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                selection_layers=args.multimodel_selection_layers,
-                selection_hidden_features=args.multimodel_selection_hidden_features,
-                lerp_value=args.multimodel_selection_lerp,
-                selection_mode=args.multimodel_selection_mode,
-                clustering_feature_size=clustering_feature_size,
-                num_top_outputs=args.multimodel_num_top_outputs
-            ).to(self.device)
         elif args.model == ADAPTIVE_RESNET:
             model = adaptive_resnet.AdaptiveResnet(
                 in_features=in_features,
@@ -267,22 +235,6 @@ class App:
                 layers=args.model_layers,
                 hidden_features=args.model_width,
                 use_layernorm=args.model_use_layernorm
-            ).to(self.device)
-        elif args.model == LEARNED_RAY:
-            model = learned_ray.LearnedRayModel(
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                use_layernorm=args.model_use_layernorm
-            ).to(self.device)
-        elif args.model == ATLASNET:
-            model = atlasnet.AtlasNet(
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                atlas_layers=args.atlasnet_atlas_layers,
-                atlas_features=args.atlasnet_atlas_features
             ).to(self.device)
         elif args.model == SUBNET:
             subnet_factors = [
@@ -295,56 +247,6 @@ class App:
                 layers=args.model_layers,
                 hidden_features=args.model_width,
                 factors=subnet_factors
-            ).to(self.device)
-        elif args.model == SUBNET_SVD:
-            subnet_factors = [
-                (x[0], x[1]) for x in args.subnet_factors] if args.subnet_factors else None
-            if args.subnet_interleave:
-                raise ValueError("Interleave deprecated")
-            model = subnet_svd.SubNetSVD(
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                factors=subnet_factors,
-                svd_components=args.svd_components,
-                load_from=args.svd_load_from
-            ).to(self.device)
-        elif args.model == SVDNET:
-            subnet_factors = args.subnet_factors if args.subnet_factors else None
-            model = svdnet.SVDNet(
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                factors=subnet_factors,
-                svd_components=args.svd_components,
-                load_from=args.svd_load_from
-            ).to(self.device)
-        elif args.model == MULTISUBNET:
-            model = multisubnet.MultiSubnet(
-                num_models=args.multimodel_num_models,
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                selection_layers=args.multimodel_selection_layers,
-                selection_hidden_features=args.multimodel_selection_hidden_features,
-                lerp_value=args.multimodel_selection_lerp,
-                selection_mode=args.multimodel_selection_mode
-            ).to(self.device)
-        elif args.model == MULTIRESNET:
-            model = multiresnet.MultiResnet(
-                num_models=args.multimodel_num_models,
-                in_features=in_features,
-                out_features=out_features,
-                layers=args.model_layers,
-                hidden_features=args.model_width,
-                selection_layers=args.multimodel_selection_layers,
-                selection_hidden_features=args.multimodel_selection_hidden_features,
-                lerp_value=args.multimodel_selection_lerp,
-                selection_mode=args.multimodel_selection_mode,
-                output_every=args.model_output_every
             ).to(self.device)
         elif args.model == MIPNET:
             subnet_factors = [
@@ -435,14 +337,6 @@ class App:
                 self.aux_model.load_state_dict(
                     latest_checkpoint[CheckpointKeys.AUX_MODEL_STATE_DICT])
 
-        # Load the aux model from the other checkpoint if it is available.
-        if not latest_checkpoint and args.svd_load_from:
-            load_from_checkpoint = torch_checkpoint_manager.CheckpointManager(
-                args.svd_load_from).load_latest_checkpoint()
-            if load_from_checkpoint and CheckpointKeys.AUX_MODEL_STATE_DICT in load_from_checkpoint and self.aux_model:
-                self.aux_model.load_state_dict(
-                    load_from_checkpoint[CheckpointKeys.AUX_MODEL_STATE_DICT])
-
         return checkpoint_manager, writer, optimizer, latent_optimizer, lr_scheduler
 
     def get_importance_map(self, height: int, width: int, focal: float, pose: torch.Tensor, inference_height: int = 64,
@@ -519,8 +413,6 @@ class App:
         all_ray_outputs = []
         expected_layers_outputs = []
         layer_outputs = []
-        mm_model_selection = []
-        mm_model_top_selection_indices = []
         uvmap_outputs = []
         aux_outputs = []
         iterable = range(iterations) if iterations <= 1 else tqdm.tqdm(
@@ -548,46 +440,9 @@ class App:
                 if model_output.layer_outputs is not None:
                     layer_outputs.append(
                         model_output.layer_outputs)
-            elif isinstance(model_output, multimodel.MultiModelMLPOutputs):
-                if aux_discarding:
-                    output_tensor = model_output.model_output
-                    selection_tensor = model_output.selection_indices
-                    padded_model_output = torch.zeros(
-                        (ray_subset.shape[0], output_tensor.shape[1]),
-                        device=output_tensor.device,
-                        dtype=output_tensor.dtype)
-                    padded_model_output[run_outputs.aux_discarding_keep] = output_tensor
-                    all_ray_outputs.append(padded_model_output)
-                    full_selection_output = torch.zeros(
-                        (ray_subset.shape[0]),
-                        device=selection_tensor.device,
-                        dtype=selection_tensor.dtype)
-                    full_selection_output[run_outputs.aux_discarding_keep] = selection_tensor
-                    mm_model_selection.append(full_selection_output)
-                    if model_output.top_selection_indices is not None:
-                        tsi_tensor = model_output.top_selection_indices
-                        tsi_0 = torch.zeros(
-                            (ray_subset.shape[0], tsi_tensor[0].shape[1]),
-                            device=tsi_tensor[0].device,
-                            dtype=tsi_tensor[0].dtype)
-                        tsi_0[run_outputs.aux_discarding_keep] = tsi_tensor[0]
-                        tsi_1 = torch.zeros(
-                            (ray_subset.shape[0], tsi_tensor[0].shape[1]),
-                            device=tsi_tensor[1].device,
-                            dtype=tsi_tensor[1].dtype)
-                        tsi_1[run_outputs.aux_discarding_keep] = tsi_tensor[1]
-                        mm_model_top_selection_indices.append((tsi_0, tsi_1))
-                else:
-                    all_ray_outputs.append(model_output.model_output)
-                    mm_model_selection.append(model_output.selection_indices)
-                    if model_output.top_selection_indices is not None:
-                        mm_model_top_selection_indices.append(
-                            model_output.top_selection_indices)
             elif (isinstance(model_output, adaptive_resnet.AdaptiveResnetOutputs) or
                   isinstance(model_output, subnet.SubNetOutputs) or
                   isinstance(model_output, mipnet.MipNetOutputs) or
-                  isinstance(model_output, subnet_svd.SubNetSVDOutputs) or
-                  isinstance(model_output, svdnet.SVDNetOutputs) or
                   isinstance(model_output, smipnet.SMipNetOutputs)):
                 if aux_discarding:
                     output_tensor = model_output.outputs
@@ -611,14 +466,6 @@ class App:
                     all_ray_outputs.append(padded_model_output)
                 else:
                     all_ray_outputs.append(model_output)
-            elif isinstance(model_output, atlasnet.AtlasNetOutputs):
-                all_ray_outputs.append(model_output.model_output)
-                uvmap_outputs.append(model_output.uv_map)
-            elif (isinstance(model_output, multisubnet.MultiSubnetOutputs) or
-                  isinstance(model_output, multiresnet.MultiResnetOutputs)):
-                all_ray_outputs.append(model_output.model_outputs[:, -1])
-                layer_outputs.append(model_output.model_outputs)
-                mm_model_selection.append(model_output.selection_indices)
             else:
                 raise ValueError(f"Unknown type {type(model_output)}")
             if run_outputs.aux_output is not None:
@@ -636,17 +483,6 @@ class App:
                 layer_outputs) == 1 else torch.cat(layer_outputs, dim=0)
             outputs.layer_outputs = outputs.layer_outputs.permute((1, 0, 2)).reshape(-1, height, width,
                                                                                      self.model.out_features)
-        if mm_model_selection:
-            outputs.mm_model_selection = torch.cat(
-                mm_model_selection, dim=0).reshape(height, width)
-        if mm_model_top_selection_indices:
-            k = mm_model_top_selection_indices[0][0].shape[1]
-            outputs.mm_model_top_selection_indices = (
-                torch.cat([x[0] for x in mm_model_top_selection_indices],
-                          dim=0).reshape(height, width, k),
-                torch.cat([x[1] for x in mm_model_top_selection_indices],
-                          dim=0).reshape(height, width, k)
-            )
         if uvmap_outputs:
             outputs.uvmap_outputs = torch.cat(uvmap_outputs, dim=0).reshape(
                 height, width, uvmap_outputs[0].shape[-1])
@@ -695,7 +531,6 @@ class App:
         all_ray_outputs = []
         expected_layers_outputs = []
         layer_outputs = []
-        mm_model_selection = []
         uvmap_outputs = []
         aux_outputs = []
         iterable = range(iterations) if iterations <= 1 else tqdm.tqdm(
@@ -726,8 +561,6 @@ class App:
             if (isinstance(model_output, adaptive_resnet.AdaptiveResnetOutputs) or
                     isinstance(model_output, subnet.SubNetOutputs) or
                     isinstance(model_output, mipnet.MipNetOutputs) or
-                    isinstance(model_output, subnet_svd.SubNetSVDOutputs) or
-                    isinstance(model_output, svdnet.SVDNetOutputs) or
                     isinstance(model_output, smipnet.SMipNetOutputs)):
                 if aux_discarding:
                     padded_model_output = torch.zeros(
@@ -779,9 +612,6 @@ class App:
             outputs.layer_outputs = torch.cat(layer_outputs, dim=0).permute((1, 0, 2)).reshape(
                 -1,
                 height, width, self.model.out_features)
-        if mm_model_selection:
-            outputs.mm_model_selection = torch.cat(
-                mm_model_selection, dim=0).reshape(height, width)
         if uvmap_outputs:
             outputs.uvmap_outputs = torch.cat(uvmap_outputs, dim=0).reshape(
                 height, width, uvmap_outputs[0].shape[-1])
@@ -887,9 +717,6 @@ class App:
                         expected_layers_image_es = rendered_image_es_outputs.expected_layers_image / (
                             len(self.model.model_layers) - 1)
                         val_images_layers_es.append(expected_layers_image_es)
-                    if rendered_image_outputs.mm_model_selection is not None:
-                        val_mm_selection_image.append(
-                            rendered_image_outputs.mm_model_selection.cpu())
                 val_images = torch.stack(val_images)
                 writer.add_scalar("val/10_render_time",
                                   np.mean(render_image_times), step)
@@ -917,13 +744,6 @@ class App:
                     if val_layers:
                         writer.add_images("val/31_output_layers_images", torch.clamp(val_layers[0][:, :, :, :3], 0, 1),
                                           step, dataformats="NHWC")
-                if val_mm_selection_image:
-                    val_mm_selection_image = torch.stack(
-                        val_mm_selection_image)[:, :, :, None]
-                    val_mm_selection_image = my_torch_utils.greyscale_to_turbo_colormap(
-                        val_mm_selection_image / args.multimodel_num_models)
-                    writer.add_images(
-                        "val/30_multimodel_selection", val_mm_selection_image, step, dataformats="NHWC")
                 if aux_images:
                     aux_images = torch.stack(aux_images)
                     writer.add_images(
@@ -1100,9 +920,6 @@ class App:
         if args.model == ADAPTIVE_MLP:
             model_output: adaptive_mlp.AdaptiveMLPOutputs = self.model(
                 features, early_stopping)
-        elif args.model == MULTIMODEL:
-            model_output: multimodel.MultiModelMLPOutputs = self.model(
-                features)
         elif args.model == ADAPTIVE_RESNET:
             if lods:
                 model_output: adaptive_resnet.AdaptiveResnetOutputs = self.model(
@@ -1110,10 +927,8 @@ class App:
             else:
                 model_output: adaptive_resnet.AdaptiveResnetOutputs = self.model(
                     features)
-        elif args.model in (MLP, LEARNED_RAY):
+        elif args.model in (MLP,):
             model_output: torch.Tensor = self.model(features)
-        elif args.model == ATLASNET:
-            model_output: atlasnet.AtlasNetOutputs = self.model(features)
         elif args.model == SUBNET:
             if lods:
                 model_output: subnet.SubNetOutputs = self.model(features, [self.model.factors[x] for x in lods],
@@ -1141,37 +956,6 @@ class App:
                     features, factors)
             else:
                 model_output: smipnet.SMipNetOutputs = self.model(features)
-        elif args.model == MULTISUBNET:
-            model_output: multisubnet.MultiSubnetOutputs = self.model(features)
-        elif args.model == MULTIRESNET:
-            model_output: multiresnet.MultiResnetOutputs = self.model(features)
-        elif args.model == SUBNET_SVD:
-            if lods:
-                model_output: subnet_svd.SubNetSVDOutputs = self.model(features, [self.model.factors[x] for x in lods],
-                                                                       **extra_options)
-            elif self.model.training and args.subnet_optimized_training:
-                model_output: subnet_svd.SubNetSVDOutputs = self.model(features, [
-                    self.rng.choice(self.model.factors[:-1]),
-                    self.model.factors[-1],
-                ], **extra_options)
-            else:
-                model_output: subnet_svd.SubNetSVDOutputs = self.model(
-                    features, **extra_options)
-        elif args.model == SVDNET:
-            if lods:
-                model_output: svdnet.SVDNetOutputs = self.model(features,
-                                                                [self.model.factors[x]
-                                                                    for x in lods],
-                                                                **extra_options)
-            elif self.model.training and args.subnet_optimized_training:
-                model_output: svdnet.SVDNetOutputs = self.model(features, [
-                    self.rng.choice(self.model.factors[:-1]),
-                    self.model.factors[-1],
-                ], **extra_options)
-            else:
-                model_output: svdnet.SVDNetOutputs = self.model(
-                    features, **extra_options)
-
         else:
             raise ValueError("Unknown model")
         loss = None
@@ -1201,58 +985,7 @@ class App:
                 efficiency_loss = torch.mean(model_output.expected_layers)
                 loss = (color_loss +
                         args.efficiency_loss_lambda * efficiency_loss)
-            elif args.model == MULTIMODEL:
-                if args.lossfn_color == "l1":
-                    pixel_loss = torch.abs(model_output.model_output - gt)
-                    color_loss = torch.mean(pixel_loss)
-                elif args.lossfn_color == "l2":
-                    pixel_loss = torch.pow(model_output.model_output - gt, 2.0)
-                    color_loss = torch.mean(pixel_loss)
-                else:
-                    raise ValueError("Unknown loss function")
-                per_ray_loss = torch.mean(pixel_loss, dim=-1)
-                if args.multimodel_importance_loss_lambda > 1e-10:
-                    mm_selection_probability = torch.log(torch.gather(model_output.selection_probabilities, 1,
-                                                                      model_output.selection_indices[:, None]))[:, 0]
-                    mm_importance_loss = args.multimodel_importance_loss_lambda * torch.mean(
-                        -mm_selection_probability * -per_ray_loss.detach())
-                if args.multimodel_loadbalance_loss_lambda > 1e-10:
-                    loadbalance_loss = args.multimodel_loadbalance_loss_lambda * multimodel.compute_load_balance_loss(model_output.selection_probabilities,
-                                                                                                                      model_output.selection_indices)
-                if args.multimodel_clustering_loss_lambda > 1e-10:
-                    expected_features = model_output.selection_probabilities @ self.model.clustering_features
-                    num_ray_features = 6
-                    channels = gt.shape[1]
-                    if args.multimodel_clustering_loss_version == 0:
-                        position_diff = torch.linalg.norm(
-                            expected_features[:, :num_ray_features] - rays[:, :num_ray_features])
-                        color_diff = torch.linalg.norm(
-                            expected_features[:, num_ray_features:(num_ray_features+channels)] - gt)
-                        clustering_loss = args.multimodel_clustering_loss_lambda * (
-                            position_diff + color_diff)
-                    elif args.multimodel_clustering_loss_version == 1:
-                        ray_dir_cos = torch.mean(F.cosine_similarity(
-                            expected_features[:, :3], rays[:, :3]))
-                        ray_momentum_cos = torch.mean(F.cosine_similarity(
-                            expected_features[:, 3:6], rays[:, 3:6]))
-                        ray_momentum_diff_norm = torch.mean(torch.linalg.norm(
-                            expected_features[:, 3:6] - rays[:, 3:6], dim=1))
-                        color_diff = torch.mean(torch.linalg.norm(
-                            expected_features[:, num_ray_features:(num_ray_features+channels)] - gt, dim=1))
-                        clustering_loss = args.multimodel_clustering_loss_lambda * (
-                            -ray_dir_cos - ray_momentum_cos + ray_momentum_diff_norm + color_diff)
-                    elif args.multimodel_clustering_loss_version == 2:
-                        color_diff = torch.mean(torch.linalg.norm(
-                            expected_features[:, num_ray_features:(num_ray_features+channels)] - gt, dim=1))
-                        clustering_loss = args.multimodel_clustering_loss_lambda * color_diff
-                    else:
-                        raise NotImplementedError(
-                            f"Unknown clustering loss verison {args.multimodel_clustering_loss_version}")
-                loss = (color_loss +
-                        (mm_importance_loss or 0.0) +
-                        (loadbalance_loss or 0.0) +
-                        (clustering_loss or 0.0))
-            elif args.model in (ADAPTIVE_RESNET, SUBNET, SUBNET_SVD, SVDNET):
+            elif args.model in (ADAPTIVE_RESNET, SUBNET,):
                 if args.lossfn_color == "l1":
                     pixel_loss = torch.abs(model_output.outputs - gt[:, None])
                 elif args.lossfn_color == "l2":
@@ -1306,27 +1039,6 @@ class App:
                 else:
                     color_loss = torch.mean(pixel_loss)
                 loss = (color_loss)
-            elif args.model in (MULTISUBNET, MULTIRESNET):
-                if args.lossfn_color == "l1":
-                    pixel_loss = torch.abs(
-                        model_output.model_outputs - gt[:, None])
-                    color_loss = torch.mean(pixel_loss)
-                elif args.lossfn_color == "l2":
-                    pixel_loss = torch.pow(
-                        model_output.model_outputs - gt[:, None], 2.0)
-                    color_loss = torch.mean(pixel_loss)
-                else:
-                    raise ValueError("Unknown loss function")
-                per_ray_loss = torch.mean(pixel_loss[:, -1], dim=-1)
-                mm_selection_probability = torch.log(torch.gather(model_output.selection_probabilities, 1,
-                                                                  model_output.selection_indices[:, None]))[:, 0]
-                mm_importance_loss = torch.mean(
-                    -mm_selection_probability * -per_ray_loss.detach())
-                loadbalance_loss = multimodel.compute_load_balance_loss(model_output.selection_probabilities,
-                                                                        model_output.selection_indices)
-                loss = (color_loss +
-                        args.multimodel_importance_loss_lambda * mm_importance_loss +
-                        args.multimodel_loadbalance_loss_lambda * loadbalance_loss)
             else:
                 raise ValueError(f"Unknown model {str(type(self.model))}")
             if args.use_aux_network:
@@ -1531,8 +1243,6 @@ class App:
                     self.save_checkpoint(step)
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
-            if args.model == MULTIMODEL and args.multimodel_selection_freeze_epochs == epoch:
-                self.model.freeze_selection_model()
             if args.training_val_psnr_cutoff > 0 and epoch > 0 and epoch % 10 == 0:
                 validation_psnr = self.compute_validation_psnr()
                 self.writer.add_scalar("train/validation_psnr",

@@ -9,15 +9,9 @@ HOLOSTUDIO = "holostudio"
 NERFSYNTHETIC = "nerfsynthetic"
 ADAPTIVE_MLP = "AdaptiveMLP"
 MLP = "MLP"
-MULTIMODEL = "Multimodel"
 ADAPTIVE_RESNET = "AdaptiveResnet"
 LEARNED_RAY = "LearnedRay"
-ATLASNET = "AtlasNet"
 SUBNET = "SubNet"
-MULTISUBNET = "Multisubnet"
-MULTIRESNET = "Multiresnet"
-SUBNET_SVD = "SubNetSVD"
-SVDNET = "SVDNet"
 MIPNET = "MipNet"
 SMIPNET = "SMipNet"
 
@@ -234,10 +228,8 @@ def parse_options():
                         default=0.1)
     parser.add_argument("--model",
                         type=str,
-                        choices=[ADAPTIVE_MLP, MLP, MULTIMODEL,
-                                 ADAPTIVE_RESNET, LEARNED_RAY,
-                                 ATLASNET, SUBNET, SUBNET_SVD,
-                                 MULTISUBNET, MULTIRESNET, SVDNET, MIPNET,
+                        choices=[ADAPTIVE_MLP, MLP,
+                                 ADAPTIVE_RESNET, SUBNET, MIPNET,
                                  SMIPNET],
                         help="Which model to use",
                         default=MLP)
@@ -400,14 +392,6 @@ def parse_options():
                         type=int,
                         help="Viewer ray batch size",
                         default=2000000)
-    parser.add_argument("--svd-components",
-                        type=int,
-                        help="",
-                        default=128)
-    parser.add_argument("--svd-load-from",
-                        type=str,
-                        help="",
-                        default="")
     parser.add_argument("--lod-factor-schedule",
                         type=lambda x: json.loads(x) if x else "",
                         nargs="*",
