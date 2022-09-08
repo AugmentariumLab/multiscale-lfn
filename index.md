@@ -23,6 +23,8 @@ background-image: linear-gradient(120deg, #156064, #086375);
 }
 </style>
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/TAK7KavGivo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="max-width: 100%; position: relative; left: 50%; transform: translateX(-50%);"></iframe>
+
 ## Abstract
 
 [![Teaser image of Progressive Multi-Scale Light Field Networks](resources/teaser.png)](#)
