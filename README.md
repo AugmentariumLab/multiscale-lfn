@@ -8,15 +8,22 @@ Codebase for _Progressive Multi-scale Light Field Networks_ (3DV 2022).
 2. Setup a PyTorch environment and install `requirements.txt`.
 3. To train, run `python app.py -c configs/multiscale_jon.txt`. \
    Alternatively, download our [trained LFNs](https://drive.google.com/drive/folders/16rtVRySPl5mujoEaowMoU2b71btljUPz?usp=sharing) to `runs`.
-4. To open the interactive viewer, run `python app.py -c configs/multiscale_jon.txt --script-mode=viewer`.
 
-## Troubleshooting
+
+## Interactive Viewer
+
+To use the viewer on Ubuntu, run the following:
+```bash
+sudo apt install libmesa-dev libglfw3
+# Required to install pycuda with OpenGL support
+echo "CUDA_ENABLE_GL = True" > ~/.aksetup-defaults.py
+pip install pycuda glumpy pyopengl
+rm ~/.aksetup-defaults.py
+
+python app.py -c configs/multiscale_jon.txt --script-mode=viewer
+```
+
 If you get `CUBLAS_STATUS_EXECUTION_FAILED` while opening the viewer, try running with `CUBLAS_WORKSPACE_CONFIG=:0:0`. ([PyTorch Issue](https://github.com/pytorch/pytorch/issues/54975)).
-
-For the viewer you will need the following:
-* Ubuntu (WSL2 is not supported) with `sudo apt install libmesa-dev libglfw3`
-* [`pycuda`](https://documen.tician.de/pycuda/) compiled with OpenGL
-* `pip install glumpy pyopengl`
 
 
 ## Citation
