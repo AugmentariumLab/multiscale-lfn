@@ -1,6 +1,6 @@
 configargparse
 tqdm
-sklearn
+scikit-learn
 moviepy
 open3d
 opencv-contrib-python
