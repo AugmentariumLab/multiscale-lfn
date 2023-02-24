@@ -230,4 +230,4 @@ Neural representations have shown great promise in their ability to represent ra
 }
 ```
 
-David Li, and Amitabh Varshney. Progressive Multi-Scale Light Field Networks. In 2022 International Conference on 3D Vision (3DV).
+David Li, and Amitabh Varshney. Progressive Multi-Scale Light Field Networks. In 2022 International Conference on 3D Vision (3DV), Prague, Czech Republic, 2022, pp. 231-241, doi: 10.1109/3DV57658.2022.00035.
