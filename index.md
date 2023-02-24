@@ -218,15 +218,15 @@ Neural representations have shown great promise in their ability to represent ra
 ## Citation
 
 ```bibtex
-@inproceedings{Li2022Progressive,
+@inproceedings{li2022progressive,
   author={Li, David and Varshney, Amitabh},
-  booktitle={2022 International Conference on 3D Vision (3DV)},
-  title={Progressive Multi-Scale Light Field Networks},
+  booktitle={2022 International Conference on 3D Vision (3DV)}, 
+  title={Progressive Multi-Scale Light Field Networks}, 
   year={2022},
   volume={},
   number={},
-  pages={},
-  doi={}
+  pages={231-241},
+  doi={10.1109/3DV57658.2022.00035}
 }
 ```
 
