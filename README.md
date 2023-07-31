@@ -29,7 +29,7 @@ If you get `CUBLAS_STATUS_EXECUTION_FAILED` while opening the viewer, try runnin
 ## Citation
 
 ```bibtex
-@inproceedings{Li2022Progressive,
+@inproceedings{li2022progressive,
   author={Li, David and Varshney, Amitabh},
   booktitle={2022 International Conference on 3D Vision (3DV)}, 
   title={Progressive Multi-Scale Light Field Networks}, 
