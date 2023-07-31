@@ -1,6 +1,6 @@
-# Progressive Multi-scale Light Field Networks
+# Progressive Multi-Scale Light Field Networks
 
-Codebase for _Progressive Multi-scale Light Field Networks_ (3DV 2022).
+Codebase for _Progressive Multi-Scale Light Field Networks_ (3DV 2022).
 
 ## Getting Started
 
@@ -31,13 +31,13 @@ If you get `CUBLAS_STATUS_EXECUTION_FAILED` while opening the viewer, try runnin
 ```bibtex
 @inproceedings{Li2022Progressive,
   author={Li, David and Varshney, Amitabh},
-  booktitle={2022 International Conference on 3D Vision (3DV)},
-  title={Progressive Multi-scale Light Field Networks},
+  booktitle={2022 International Conference on 3D Vision (3DV)}, 
+  title={Progressive Multi-Scale Light Field Networks}, 
   year={2022},
   volume={},
   number={},
-  pages={},
-  doi={}
+  pages={231-241},
+  doi={10.1109/3DV57658.2022.00035}}
 }
 ```
 
