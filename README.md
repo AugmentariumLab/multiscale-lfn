@@ -20,7 +20,7 @@ echo "CUDA_ENABLE_GL = True" > ~/.aksetup-defaults.py
 pip install pycuda glumpy pyopengl
 rm ~/.aksetup-defaults.py
 
-python app.py -c configs/multiscale_jon.txt --script-mode=viewer
+python app.py -c configs/run_mipnet_jon.txt --script-mode=viewer
 ```
 
 If you get `CUBLAS_STATUS_EXECUTION_FAILED` while opening the viewer, try running with `CUBLAS_WORKSPACE_CONFIG=:0:0`. ([PyTorch Issue](https://github.com/pytorch/pytorch/issues/54975)).
