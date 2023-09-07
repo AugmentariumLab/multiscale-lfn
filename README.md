@@ -6,7 +6,7 @@ Codebase for _Progressive Multi-Scale Light Field Networks_ (3DV 2022).
 
 1. Download [our datasets](https://drive.google.com/drive/folders/16rtVRySPl5mujoEaowMoU2b71btljUPz?usp=sharing) and extract them to `datasets` directory.
 2. Setup a PyTorch environment and install `requirements.txt`.
-3. To train, run `python app.py -c configs/multiscale_jon.txt`. \
+3. To train, run `python app.py -c configs/run_mipnet_jon.txt`. \
    Alternatively, download our [trained LFNs](https://drive.google.com/drive/folders/16rtVRySPl5mujoEaowMoU2b71btljUPz?usp=sharing) to `runs`.
 
 
